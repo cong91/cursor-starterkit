@@ -1,147 +1,177 @@
 # cursor-starterkit
 
 <p align="center">
-  Bootstrap Cursor IDE with a shared global baseline and a thin per-project <code>.cursor/</code> overlay — skills, slash commands, rules, MCP, hooks, SQLite memory, and beads task coordination.
+  One-command setup that turns Cursor into a fully-configured AI coding workstation — skills, slash commands, rules, MCP servers, hooks, project memory, and task tracking, all wired into Cursor's native config surface.
 </p>
 
 <p align="center">
-  <a href="#english">English</a> | <a href="#tiếng-việt">Tiếng Việt</a>
+  <a href="#install">Install</a> · <a href="#what-you-get">What you get</a> · <a href="#daily-workflow">Daily workflow</a> · <a href="#memory">Memory</a> · <a href="#tiếng-việt">Tiếng Việt</a>
 </p>
 
 ---
 
-## English
+## Install
 
-### What this is
-
-`cursor-starterkit` is **not** a copy of OpenCode. It is a Cursor-native installer that maps the same *ideas* (skills, commands, rules, MCP, memory, task coordination) onto **Cursor's real configuration surface**.
-
-| Cursor surface | Global path | Project path |
-| -------------- | ----------- | ------------ |
-| **Skills** | `~/.cursor/skills/` | `.cursor/skills/` |
-| **Slash commands** | `~/.cursor/commands/` | `.cursor/commands/` |
-| **Rules** | — | `.cursor/rules/*.mdc` |
-| **MCP** | `~/.cursor/mcp.json` | `.cursor/mcp.json` |
-| **Hooks** | `~/.cursor/hooks.json` + `~/.cursor/hooks/scripts/` | `.cursor/hooks.json` |
-| **Memory DB** | — | `.cursor/memory.db` (SQLite) |
-| **Project memory** | — | `.cursor/memory/project/*.md` |
-| **Beads tasks** | — | `.beads/` (via `br` CLI) |
-
-OpenCode concepts that **do not** map to Cursor (TypeScript plugin API, `system.transform`, `message.part.updated`) are replaced with Cursor-native equivalents (hooks, MCP, rules). See [vs OpenCode](#vs-opencode-starterkit).
-
-### Install (two layers)
-
-#### 1. Global — once per machine
+### 1. Set up your machine (once)
 
 ```bash
 npx cursor-starterkit
-# or after install:
-cursor-starterkit install --yes
 ```
 
-Installs into `~/.cursor/`:
+That single command installs everything into `~/.cursor/`:
 
-- **23 skills** — verification, debugging, TDD, planning, memory-system, beads, prompt-leverage, deep-research, code-navigation, mockup-to-code, anti-ai-slop, accessibility-audit, playwright, chrome-devtools, context7, sequential-thinking, supabase, frontend-design, subagent-driven-development, receiving/requesting-code-review, context-management, incremental-implementation, writing-plans
-- **21 slash commands** — `/pr`, `/research` (global) + `/init`, `/plan`, `/verify`, `/ship`, `/review`, `/debug`, `/br`, `/memory-search`, `/create`, `/start`, `/fix`, `/iterate`, `/ui-review`, `/audit`, `/handoff`, `/resume`, `/status`, `/init-user`, `/explore` (project)
-- **7 MCP servers** — ripgrep, context7, sequential-thinking, playwright, chrome-devtools, supabase, **cursor-memory** (agent-autonomous memory retrieval)
-- **4 hooks** — `sessionStart` (memory inject), `stop` (memory capture), `beforeShellExecution` (guard: curl|bash block + conventional commits), `beforeSubmitPrompt` (prompt-leverage upgrade)
-- **Memory DB module** — `~/.cursor/memory-db/` (node:sqlite + TF-IDF distill + search CLI)
-- **CLI shims** — `csk`, `cursor-starterkit` in `~/.local/bin/`
-- Package copy at `~/.cursor/starterkit/`
+- **23 skills** the agent loads on demand
+- **22 slash commands** you trigger by typing `/` in Agent chat
+- **7 MCP servers** (ripgrep, context7, sequential-thinking, playwright, chrome-devtools, supabase, and `cursor-memory` for agent-driven recall)
+- **3 hooks** (memory capture/inject, and a guard that blocks `curl | bash` and enforces Conventional Commits)
+- **Memory engine** — SQLite + TF-IDF distillation, zero dependencies
+- **CLI shims** `csk` and `cursor-starterkit` on your PATH
 
-Reload Cursor after install: **Ctrl+Shift+P → Reload Window**
+After it finishes, reload Cursor so the new MCP servers and hooks are picked up:
 
-#### 2. Project — per repository
+> **Ctrl+Shift+P → Reload Window**
+
+### 2. Set up a project (from inside Cursor)
+
+Open any project in Cursor, then in the Agent chat type:
+
+```
+/init
+```
+
+The agent runs the installer for you — it scaffolds the `.cursor/` overlay (project memory, rules, slash commands, MCP config), detects your tech stack, validates your build/test/lint commands, and writes a `CLAUDE.md` so Cursor automatically loads project context on every session. No terminal needed.
+
+Prefer the terminal? You can also run:
 
 ```bash
 cd your-project
 csk install --yes
 ```
 
-Creates:
+Flags: `--yes` (non-interactive), `--force-memory` (regenerate memory files), `--force-rules` (regenerate rules).
 
-- `.cursor/memory/project/*.md` — project context scaffold (6 files)
-- `.cursor/memory/_templates/` — blank templates
-- `.cursor/rules/` — `project-context.mdc` (alwaysApply), `workflow`, `verification`, `typescript`
-- `.cursor/commands/` — 19 project slash commands
-- `.cursor/mcp.json` — project MCP template (additive)
-- `.beads/` — initialized if `br` CLI is on PATH
+---
 
-Flags: `--yes`, `--force-memory`, `--force-rules`
+## What you get
 
-### Memory system (Cursor-native, two-way)
+After install, Cursor reads from these native locations:
 
-Cursor has **no built-in cross-session memory** (the "Memories" feature was removed in Cursor 2.1.x — only Rules persist). This starterkit adds memory two ways:
+| Capability | Global (all projects) | Per project |
+| ---------- | --------------------- | ----------- |
+| Skills | `~/.cursor/skills/` | `.cursor/skills/` |
+| Slash commands | `~/.cursor/commands/` | `.cursor/commands/` |
+| Rules | — | `.cursor/rules/*.mdc` |
+| MCP servers | `~/.cursor/mcp.json` | `.cursor/mcp.json` |
+| Hooks | `~/.cursor/hooks.json` + `~/.cursor/hooks/scripts/` | `.cursor/hooks.json` |
+| Project memory | — | `.cursor/memory/project/*.md` |
+| Memory database | — | `.cursor/memory.db` (SQLite) |
+| Task tracking | — | `.beads/` (via `br` CLI) |
 
-**1. Automatic context (every session):**
-- hook `stop` reads `transcript_path` (Cursor's real field) → distills the full conversation via TF-IDF → stores observations in `.cursor/memory.db`
-- hook `sessionStart` writes recent observations to `.cursor/memory/project/injected.md`
-- rule `project-context.mdc` (`alwaysApply`) surfaces `injected.md` into context — Cursor does this automatically, no agent action needed
+### Skills (23)
 
-**2. Agent-autonomous retrieval (MCP):**
-- `cursor-memory` MCP server exposes `memory_search`, `memory_recent`, `memory_remember`, `memory_stats`
-- The agent calls these on its own when it needs past context — no manual `/memory-search`
-- Memory stays local per-project (SQLite + FTS5), not cloud
+Loaded by the agent when the task matches the skill description:
 
-Verified with a real Cursor transcript: 108 messages → 1 observation with actual conversation content; `memory_search "sqlite memory"` → FTS5 hit.
+`verification-before-completion` · `systematic-debugging` · `test-driven-development` · `writing-plans` · `incremental-implementation` · `requesting-code-review` · `receiving-code-review` · `memory-system` · `beads` · `prompt-leverage` · `deep-research` · `code-navigation` · `mockup-to-code` · `anti-ai-slop` · `accessibility-audit` · `playwright` · `chrome-devtools` · `context7` · `sequential-thinking` · `supabase` · `frontend-design` · `subagent-driven-development` · `context-management`
 
-**Requirements:** Node ≥ 22 (for `node:sqlite`).
+### Slash commands (22)
 
-**Honest limitations:** distillation is heuristic TF-IDF (no LLM curator — Cursor doesn't expose an LLM-curate hook); transcripts have no timestamps (file-order only); inject is via markdown+rule, not direct system-prompt transform.
+Type `/` in Agent chat:
 
-### Beads (task coordination)
+**Global:** `/pr` · `/research`
 
-`br` (beads_rust) is a standalone CLI, independent of Cursor. `csk install` detects it and runs `br init` if absent.
+**Project:** `/init` · `/plan` · `/verify` · `/ship` · `/review` · `/debug` · `/fix` · `/iterate` · `/create` · `/start` · `/ui-review` · `/audit` · `/handoff` · `/resume` · `/status` · `/explore` · `/init-user` · `/br` · `/memory-search` · `/session-search`
 
-- `/br list`, `/br create "..."`, `/br reserve <id>`, `/br done <id>`
-- Persistent, multi-session, dependencies, git-synced
-- vs TodoWrite: use `br` when work spans sessions or has dependencies
+### MCP servers (7)
 
-Install `br` separately (see `beads` skill). The guard hook blocks pipe-to-shell, so download the install script first, inspect, then run.
+| Server | Use |
+| ------ | --- |
+| `cursor-memory` | Agent searches and stores project memory autonomously |
+| `ripgrep` | Fast code search across large repos |
+| `context7` | Look up current library/framework docs before writing code |
+| `sequential-thinking` | Step-by-step reasoning for complex problems |
+| `playwright` | Browser automation, screenshots, E2E tests |
+| `chrome-devtools` | Page inspection, profiling, runtime evaluation |
+| `supabase` | Run SQL, manage migrations, generate TypeScript types (needs `SUPABASE_ACCESS_TOKEN`) |
 
-### Daily workflow in Cursor
+MCP is merged additively into `~/.cursor/mcp.json` — your existing servers are never overwritten.
 
-1. Open project with `.cursor/` overlay
-2. Agent chat → type `/` for commands
-3. `/init` → detect stack, fill memory
-4. `/plan` → implement → `/verify` → `/ship`
-5. Skills auto-suggest from descriptions; mention by name when needed
-6. `/memory-search` to recall past decisions; `/br` for task tracking
+### Hooks (3)
 
-### Development
+| Event | What it does |
+| ----- | ------------ |
+| `sessionStart` | Injects recent memory observations into context |
+| `stop` | Reads the session transcript, distills it, stores an observation |
+| `beforeShellExecution` | Blocks `curl | bash` / `wget | bash`; enforces Conventional Commits on `git commit` |
 
-```bash
-cd cursor-starterkit
-npm test          # 11 tests
-npm run test:smoke
+---
+
+## Daily workflow
+
+1. **Open a project** in Cursor.
+2. **Type `/init`** in Agent chat — installs the `.cursor/` overlay, detects your stack, writes `CLAUDE.md`.
+3. **Plan the work:** `/plan` to scope the change.
+4. **Implement:** let the agent code; it loads skills as needed.
+5. **Verify:** `/verify` runs your typecheck/lint/test and reports pass/fail with evidence.
+6. **Ship:** `/ship` summarizes the diff and prepares a commit/PR.
+7. **Recall past decisions:** `/memory-search "auth"` or just ask "what did we decide about auth?" — the agent queries memory via MCP automatically.
+
+### Task tracking with beads
+
+For work that spans multiple sessions or has dependencies, use `/br`:
+
+```
+/br create "refactor auth module"
+/br reserve <id>
+/br done <id>
 ```
 
-### vs OpenCode starterkit
+`br` (beads_rust) is a standalone CLI. `csk install` detects it and initializes `.beads/` automatically. If it's not installed, the starterkit tells you how to add it. Use TodoWrite for single-session linear work, and `br` for anything you need to remember next week.
 
-| | OpenCode | Cursor starterkit |
-| - | -------- | ----------------- |
-| Config root | `~/.config/opencode/` | `~/.cursor/` |
-| Rules | `AGENTS.md` | `.cursor/rules/*.mdc` |
-| Commands | `command/*.md` | `commands/*.md` (slash `/`) |
-| Plugins | TypeScript plugins (`@opencode-ai/plugin`) | Hooks (Node stdin/stdout JSON) |
-| Memory | SQLite plugin + 4-tier pipeline + LLM curator | SQLite + TF-IDF distill + heuristic observations |
-| Memory capture | per message-part (`message.part.updated`) | per session summary (hook `stop`) |
-| Memory inject | `system.transform` into system prompt | markdown `injected.md` + `alwaysApply` rule |
-| Session search | plugin reads OpenCode session DB | `/memory-search` over project memory DB |
-| Guard / prompt upgrade | plugins (`guard.ts`, `prompt-leverage.ts`) | hooks (`guard.mjs`, `prompt-leverage.mjs`) |
-| Beads | plugin `beads-bridge` + skill | skill `beads` + `/br` command + `br init` in installer |
-| Requires `br` / beads | Yes | Optional (detected, not required) |
-| MCP | `opencode.json` mcp block | `~/.cursor/mcp.json` (Cursor native) |
+---
 
-**Why not copy OpenCode's plugins**: Cursor does not expose OpenCode's plugin API (`message.part.updated`, `system.transform`, `messages.transform`). Those plugins cannot run in Cursor. The starterkit reimplements the equivalent behavior using Cursor's hook + MCP + rule surfaces.
+## Memory
+
+Cursor does not persist conversation memory across sessions on its own — each new chat starts fresh, and the built-in "Memories" feature was removed in Cursor 2.1.x. This starterkit gives every project a durable memory layer that works two ways:
+
+### 1. Automatic — every session, no action needed
+
+- When a session ends, the `stop` hook reads Cursor's transcript file (`transcript_path`) and distills the full conversation into a memory observation using TF-IDF.
+- When the next session starts, the `sessionStart` hook writes the latest observations into `.cursor/memory/project/injected.md`.
+- A rule (`alwaysApply`) tells Cursor to load that file into context automatically.
+
+### 2. Agent-driven — the agent queries memory when it needs to
+
+The `cursor-memory` MCP server exposes four tools the agent calls on its own:
+
+- `memory_search` — FTS5 keyword search across observations
+- `memory_recent` — latest observations
+- `memory_remember` — store a new decision or fact
+- `memory_stats` — database row counts
+
+So when you ask "what did we decide about the auth approach?", the agent runs `memory_search "auth"` without you touching anything.
+
+Memory is stored locally per project in `.cursor/memory.db` (SQLite, FTS5-indexed). Nothing leaves your machine.
+
+**Requirements:** Node ≥ 22 (uses the built-in `node:sqlite`).
+
+**Honest limits:** distillation is heuristic TF-IDF (no LLM curator, because Cursor does not expose an LLM-curation hook); transcripts carry no timestamps so ordering is by file order; context injection is via a markdown file + rule rather than a direct system-prompt transform.
+
+---
+
+## Development
+
+```bash
+git clone git@github.com:cong91/cursor-starterkit.git
+cd cursor-starterkit
+npm test            # 11 tests
+npm run test:smoke  # both CLI bins --help
+```
+
+Publishing is automated: pushing a `v*` tag runs the GitHub Action (`npm test` → smoke → `npm publish` with `NPM_TOKEN`). See `.github/workflows/publish.yml`.
 
 ---
 
 ## Tiếng Việt
-
-### Đây là gì
-
-`cursor-starterkit` **không** copy nguyên OpenCode. Đây là bộ cài đặt **dành riêng cho Cursor**, chuyển các ý tưởng (skill, command, rule, MCP, memory, beads) sang đúng cơ chế Cursor hỗ trợ.
 
 ### Cài đặt
 
@@ -151,33 +181,37 @@ npm run test:smoke
 npx cursor-starterkit
 ```
 
-Cài 23 skill, 21 slash command, 6 MCP, 4 hook, module memory SQLite vào `~/.cursor/`. Reload Cursor sau khi cài.
+Cài 23 skill, 22 slash command, 7 MCP, 3 hook, engine memory SQLite vào `~/.cursor/`. Sau khi cài xong, reload Cursor (Ctrl+Shift+P → Reload Window).
 
-**Từng dự án:**
+**Mỗi project (từ trong Cursor):**
 
-```bash
-cd du-an-cua-ban
-csk install --yes
+Mở project trong Cursor, gõ trong Agent chat:
+
+```
+/init
 ```
 
-Tạo `.cursor/` với memory, rules, slash commands, `.beads/` (nếu có `br`).
-
-### Memory SQLite
-
-- Lưu tại `.cursor/memory.db` (dùng `node:sqlite` built-in Node 22+, zero dependency)
-- Hook `stop` capture + chưng cất TF-IDF → observations
-- Hook `sessionStart` inject observations gần đây vào `injected.md`, rule `alwaysApply` đọc
-- `/memory-search <query>` tìm FTS5
-
-**Khác OpenCode**: capture theo tóm tắt session (Cursor hook không thấy từng message part); inject qua markdown+rule thay vì system prompt. Vẫn hơn không có.
-
-### Beads
-
-`br` CLI độc lập IDE. `csk install` phát hiện và `br init` nếu thiếu. Dùng `/br` cho task tracking đa session.
+Agent tự cài `.cursor/` overlay (memory, rules, slash commands, MCP), phát hiện tech stack, validate lệnh build/test/lint, và tạo `CLAUDE.md` để Cursor tự nạp context mỗi session. Không cần mở terminal.
 
 ### Dùng hàng ngày
 
-`/init` → `/plan` → code → `/verify` → `/ship`. `/memory-search` để nhớ quyết định cũ, `/br` cho task.
+1. `/init` — cài project + phát hiện stack + tạo CLAUDE.md
+2. `/plan` — lập kế hoạch
+3. Code — agent tự load skill khi cần
+4. `/verify` — chạy typecheck/lint/test, báo pass/fail có bằng chứng
+5. `/ship` — tóm tắt diff, chuẩn bị commit/PR
+6. Hỏi "quyết định về auth là gì?" — agent tự query memory qua MCP
+
+### Memory
+
+- **Tự động mỗi session:** hook `stop` chưng cất transcript → observation; hook `sessionStart` inject observation gần đây vào context qua rule `alwaysApply`.
+- **Agent tự query:** MCP `cursor-memory` cho agent 4 tool (`memory_search`, `memory_recent`, `memory_remember`, `memory_stats`) — agent tự gọi khi cần nhớ lại quyết định cũ.
+- Lưu local per-project ở `.cursor/memory.db` (SQLite + FTS5), không lên cloud.
+- Yêu cầu Node ≥ 22.
+
+### Task tracking
+
+`/br create "..."`, `/br reserve <id>`, `/br done <id>` — cho công việc đa session có dependency. `csk install` tự phát hiện `br` và init `.beads/`.
 
 ---
 
