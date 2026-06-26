@@ -125,7 +125,10 @@ export function getCliShimSpecs({
   packageRoot = GLOBAL_PACKAGE_ROOT.resolve(),
   binDir = GLOBAL_BIN_DIR.resolve(),
 } = {}) {
-  const pathApi = platform === 'win32' ? path.win32 : path
+  // Use the path module matching the TARGET platform, not the host platform,
+  // so shim paths are correct when generating cross-platform specs (e.g.
+  // generating posix shims from a Windows host for testing/inspection).
+  const pathApi = platform === 'win32' ? path.win32 : path.posix
   const isWindows = platform === 'win32'
 
   const specs = [

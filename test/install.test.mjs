@@ -42,8 +42,9 @@ describe('json-merge', () => {
 describe('cli shims', () => {
   it('generates windows and posix shims', () => {
     const win = getCliShimSpecs({ platform: 'win32', packageRoot: 'C:\\pkg', binDir: 'C:\\bin' })
-    assert.ok(win.some((s) => path.basename(s.shimPath) === 'csk.cmd'))
+    // Use path.win32.basename so the assertion holds on Linux CI too
+    assert.ok(win.some((s) => path.win32.basename(s.shimPath) === 'csk.cmd'))
     const posix = getCliShimSpecs({ platform: 'linux', packageRoot: '/pkg', binDir: '/bin' })
-    assert.ok(posix.some((s) => path.basename(s.shimPath) === 'csk'))
+    assert.ok(posix.some((s) => path.posix.basename(s.shimPath) === 'csk'))
   })
 })
