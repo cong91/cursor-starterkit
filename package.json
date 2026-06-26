@@ -1,6 +1,6 @@
 {
   "name": "cursor-starterkit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "type": "module",
   "description": "Global baseline + thin project overlay installer for Cursor IDE.",
