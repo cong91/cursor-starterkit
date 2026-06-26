@@ -1,0 +1,24 @@
+---
+description: Verification gate before completion claims, commits, or PRs
+alwaysApply: true
+---
+
+# Verification Before Completion
+
+**No completion claims without fresh verification evidence.**
+
+Before saying tests pass, build succeeds, or a bug is fixed:
+
+1. Identify the command that proves the claim
+2. Run it fully (not a partial check)
+3. Read output and exit code
+4. State the claim with evidence
+
+| Claim | Requires |
+| ----- | -------- |
+| Tests pass | Test output: 0 failures |
+| Lint clean | Linter output: 0 errors |
+| Build succeeds | Build exit 0 |
+| Bug fixed | Reproduce original symptom — now passes |
+
+Red flags: "should", "probably", "seems to", celebrating before verifying.

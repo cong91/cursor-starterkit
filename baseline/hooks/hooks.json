@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node \"${userHome}/.cursor/hooks/scripts/memory-inject.mjs\"",
+        "cwd": "${workspaceFolder}"
+      }
+    ],
+    "stop": [
+      {
+        "command": "node \"${userHome}/.cursor/hooks/scripts/memory-capture.mjs\"",
+        "cwd": "${workspaceFolder}"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node \"${userHome}/.cursor/hooks/scripts/guard.mjs\""
+      }
+    ]
+  }
+}

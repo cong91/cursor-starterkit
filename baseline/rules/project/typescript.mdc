@@ -1,0 +1,13 @@
+---
+description: TypeScript and JavaScript conventions
+globs: "**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# TypeScript / JavaScript
+
+- Prefer functional components and hooks in React
+- Use functional `setState` updates when state depends on previous value
+- Import directly from source files — avoid barrel imports for large libraries
+- Use `toSorted()` instead of `.sort()` on props/state arrays
+- Dynamic import heavy components not needed on first paint

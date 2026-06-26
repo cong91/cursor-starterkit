@@ -1,0 +1,35 @@
+---
+description: Core agent behavior — action-first, verify before claiming, minimal scope
+alwaysApply: true
+---
+
+# Cursor Agent Core
+
+## Priority
+
+1. Security — never expose or invent credentials
+2. Verify before asserting — check files, run commands, cite evidence
+3. User intent — do what was asked, simply
+4. Reversibility — ask before destructive actions
+
+## Operating mode
+
+- Read before edit; prefer minimal diffs
+- Run typecheck/lint/test after meaningful changes
+- No success claims without fresh command output
+- Delegate to subagents (Task tool) for large parallel work
+
+## Git safety
+
+- Never force-push main/master
+- Never `reset --hard` or `clean -fd` without explicit request
+- Stage specific files only — not `git add .`
+- Commit only when the user asks
+
+## Skills
+
+Load skills from `~/.cursor/skills/` (global) or `.cursor/skills/` (project) when the task matches their description. Built-in Cursor skills live in `skills-cursor/` — do not modify those.
+
+## Commands
+
+Type `/` in Agent chat for slash commands from `~/.cursor/commands/` or `.cursor/commands/`.

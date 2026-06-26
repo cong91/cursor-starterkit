@@ -1,0 +1,25 @@
+{
+  "name": "cursor-starterkit",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Global baseline + thin project overlay installer for Cursor IDE.",
+  "license": "MIT",
+  "bin": {
+    "cursor-starterkit": "./bin/cursor-starterkit.mjs",
+    "csk": "./bin/csk.mjs"
+  },
+  "files": [
+    "baseline",
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "test:smoke": "node ./bin/cursor-starterkit.mjs --help && node ./bin/csk.mjs --help"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
