@@ -39,7 +39,9 @@ export function printHelp(binName) {
   }
   console.log('  --help, -h Show help')
   if (!isGlobal) {
-    console.log('\nProject install flags:')
+    console.log('\nNote: the recommended way to install a project overlay is the /init')
+    console.log('      slash command inside Cursor — it runs this installer for you.')
+    console.log('\nProject install flags (used internally by /init):')
     console.log('  --yes           Apply without confirmation')
     console.log('  --force-memory  Regenerate existing memory files')
     console.log('  --force-rules   Regenerate existing project rules')

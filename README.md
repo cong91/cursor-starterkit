@@ -39,16 +39,13 @@ Open any project in Cursor, then in the Agent chat type:
 /init
 ```
 
-The agent runs the installer for you — it scaffolds the `.cursor/` overlay (project memory, rules, slash commands, MCP config), detects your tech stack, validates your build/test/lint commands, and writes a `CLAUDE.md` so Cursor automatically loads project context on every session. No terminal needed.
+That's it — the agent does everything for you:
 
-Prefer the terminal? You can also run:
+1. Installs the `.cursor/` overlay (project memory, rules, slash commands, MCP config)
+2. Detects your tech stack and validates your build/test/lint commands
+3. Writes a `CLAUDE.md` so Cursor automatically loads project context on every session
 
-```bash
-cd your-project
-csk install --yes
-```
-
-Flags: `--yes` (non-interactive), `--force-memory` (regenerate memory files), `--force-rules` (regenerate rules).
+No terminal needed. Re-run `/init` any time to refresh the overlay and detection (existing memory files are preserved, not overwritten).
 
 ---
 
@@ -125,7 +122,7 @@ For work that spans multiple sessions or has dependencies, use `/br`:
 /br done <id>
 ```
 
-`br` (beads_rust) is a standalone CLI. `csk install` detects it and initializes `.beads/` automatically. If it's not installed, the starterkit tells you how to add it. Use TodoWrite for single-session linear work, and `br` for anything you need to remember next week.
+`br` (beads_rust) is a standalone CLI. `/init` detects it and initializes `.beads/` automatically (pass `--no-beads` to skip). If `br` isn't installed, `/init` still succeeds — beads is optional. Use TodoWrite for single-session linear work, and `br` for anything you need to remember next week.
 
 ---
 
@@ -211,7 +208,7 @@ Agent tự cài `.cursor/` overlay (memory, rules, slash commands, MCP), phát h
 
 ### Task tracking
 
-`/br create "..."`, `/br reserve <id>`, `/br done <id>` — cho công việc đa session có dependency. `csk install` tự phát hiện `br` và init `.beads/`.
+`/br create "..."`, `/br reserve <id>`, `/br done <id>` — cho công việc đa session có dependency. `/init` tự phát hiện `br` và init `.beads/` (dùng `--no-beads` để bỏ qua).
 
 ---
 
