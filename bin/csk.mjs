@@ -18,6 +18,7 @@ async function main() {
       yes: cli.options.yes,
       forceMemory: cli.options.forceMemory,
       forceRules: cli.options.forceRules,
+      noBeads: cli.options.noBeads,
     })
     process.exit(result.cancelled ? 1 : 0)
   }

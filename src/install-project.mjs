@@ -97,6 +97,7 @@ export async function installProject({
   yes = false,
   forceMemory = false,
   forceRules = false,
+  noBeads = false,
 } = {}) {
   console.log(`[csk] Project overlay install for: ${cwd}\n`)
 
@@ -110,19 +111,28 @@ export async function installProject({
 
   const result = materializeProjectOverlay({ cwd, forceMemory, forceRules })
 
-  // Beads integration: init .beads/ if br is available and not already initialized
+  // Beads is OPTIONAL — never fail the install because of it.
+  // Only init .beads/ when br is present AND user didn't pass --no-beads.
   let beadsResult = null
-  const br = detectBrCli()
-  if (br.ok) {
-    const state = checkBeadsState(cwd)
-    if (!state.exists) {
-      const init = runBrInit(cwd)
-      beadsResult = { initialized: init.status === 0, brPath: br.path, brVersion: br.version }
-    } else {
-      beadsResult = { initialized: false, existed: true, brPath: br.path, brVersion: br.version }
-    }
+  if (noBeads) {
+    beadsResult = { skipped: true, reason: '--no-beads' }
   } else {
-    beadsResult = { available: false, candidates: br.candidates }
+    const br = detectBrCli()
+    if (br.ok) {
+      const state = checkBeadsState(cwd)
+      if (!state.exists) {
+        try {
+          const init = runBrInit(cwd)
+          beadsResult = { initialized: init.status === 0, brPath: br.path, brVersion: br.version }
+        } catch (err) {
+          beadsResult = { initialized: false, error: err.message }
+        }
+      } else {
+        beadsResult = { initialized: false, existed: true, brPath: br.path, brVersion: br.version }
+      }
+    } else {
+      beadsResult = { available: false, candidates: br.candidates }
+    }
   }
 
   console.log('Created/updated:')
@@ -135,21 +145,27 @@ export async function installProject({
     console.log(`\nCopied ${result.supportCopied.length} support file(s) into .cursor/memory/`)
   }
 
-  if (beadsResult.available === false) {
-    console.log('\nBeads (br CLI): not found on PATH.')
+  if (beadsResult.skipped) {
+    console.log('\nBeads: skipped (--no-beads)')
+  } else if (beadsResult.available === false) {
+    console.log('\nBeads (br CLI): not found on PATH — skipped (optional).')
     console.log('  Install br to enable multi-session task coordination (see `beads` skill).')
   } else if (beadsResult.initialized) {
     console.log(`\nBeads: initialized .beads/ (br ${beadsResult.brVersion})`)
   } else if (beadsResult.existed) {
     console.log(`\nBeads: .beads/ already exists (br ${beadsResult.brVersion})`)
+  } else if (beadsResult.error) {
+    console.log(`\nBeads: br init failed (${beadsResult.error}) — skipped, install continues.`)
   }
 
   console.log('\nTry in Cursor Agent chat:')
   console.log('  /init           — detect stack and refine project memory')
   console.log('  /plan           — create an implementation plan')
   console.log('  /verify         — run verification before shipping')
-  console.log('  /br list        — beads task coordination')
   console.log('  /memory-search  — search project memory')
+  if (!beadsResult.skipped && beadsResult.available !== false) {
+    console.log('  /br list        — beads task coordination')
+  }
 
   return { ...result, beads: beadsResult, cancelled: false }
 }

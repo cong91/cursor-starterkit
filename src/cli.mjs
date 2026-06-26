@@ -20,6 +20,7 @@ export function parseArgs(argv) {
       yes: args.includes('--yes'),
       forceMemory: args.includes('--force-memory'),
       forceRules: args.includes('--force-rules'),
+      noBeads: args.includes('--no-beads'),
       globalOnly: args.includes('--global-only'),
       projectOnly: args.includes('--project-only'),
       scope: getFlagValue('--scope'),
@@ -42,6 +43,7 @@ export function printHelp(binName) {
     console.log('  --yes           Apply without confirmation')
     console.log('  --force-memory  Regenerate existing memory files')
     console.log('  --force-rules   Regenerate existing project rules')
+    console.log('  --no-beads      Skip beads (.beads/) initialization')
   }
   if (isGlobal) {
     console.log('\nGlobal install flags:')
